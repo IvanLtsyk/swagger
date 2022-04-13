@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebApiCore.Data.Models;
 using WebApiCore.Data.Services;
@@ -18,11 +19,27 @@ namespace WebApiCore.Api.Controllers
             _customerService = customerService;
         }
 
-        // GET: api/Customers
+
+        /// <summary>
+        ///    Get All Customers.
+        /// </summary>
+        /// <remarks>
+        /// Sample request: 
+        /// 
+        /// GET: api/Customers
+        /// 
+        /// </remarks>
+        /// <returns> A list of existing custoers</returns>
+        /// <response code = "200"> Success</response>
+        /// <response code = "400"> If error occurs</response>
+        /// <response code = "404"> If no customers in database</response>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<IList<Customer>>> GetCustomers()
         {
-            return Ok(await _customerService.GetAllAsync()) ;
+            return Ok(await _customerService.GetAllAsync());
         }
 
         // GET: api/Customers/5
@@ -50,7 +67,7 @@ namespace WebApiCore.Api.Controllers
                 return BadRequest();
             }
 
-            return Ok( await _customerService.UpdateAsync(customer));
+            return Ok(await _customerService.UpdateAsync(customer));
         }
 
         // POST: api/Customers
@@ -72,7 +89,7 @@ namespace WebApiCore.Api.Controllers
             }
 
             await _customerService.DeleteAsync(customer);
-            
+
 
             return NoContent();
         }

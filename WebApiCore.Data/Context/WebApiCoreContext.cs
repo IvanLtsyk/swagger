@@ -12,7 +12,7 @@ namespace WebApiCore.Data
         public WebApiCoreContext(DbContextOptions<WebApiCoreContext> options)
             : base(options)
         {
-
+            Database.Migrate();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
