@@ -20,10 +20,6 @@ namespace WebApiCore.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
-            modelBuilder.Entity<Customer>().HasData(new Customer { Id = 1, Name = "Jon", BirthDate = new DateTime(2000, 01, 01), });
-            modelBuilder.Entity<Customer>().HasData(new Customer { Id = 2, Name = "Ben", BirthDate = new DateTime(2002, 02, 02), });
-
         }
     }
 }

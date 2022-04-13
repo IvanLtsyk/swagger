@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WebApiCore.Data;
 using WebApiCore.Data.Models;
+using WebApiCore.Data.Services;
 
 namespace WebApiCore.Api.Controllers
 {
@@ -13,63 +11,46 @@ namespace WebApiCore.Api.Controllers
     [ApiController]
     public class CustomersController : ControllerBase
     {
-        private readonly WebApiCoreContext _context;
+        private readonly ICustomerService _customerService;
 
-        public CustomersController(WebApiCoreContext context)
+        public CustomersController(ICustomerService customerService)
         {
-            _context = context;
+            _customerService = customerService;
         }
 
         // GET: api/Customers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()
+        public async Task<ActionResult<IList<Customer>>> GetCustomers()
         {
-            return await _context.Customers.ToListAsync();
+            return Ok(await _customerService.GetAllAsync()) ;
         }
 
         // GET: api/Customers/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Customer>> GetCustomer(int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
+            var customer = await _customerService.FindByIdAsync(id);
 
             if (customer == null)
             {
                 return NotFound();
             }
 
-            return customer;
+            return Ok(customer);
         }
 
         // PUT: api/Customers/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCustomer(int id, Customer customer)
+        public async Task<ActionResult<Customer>> PutCustomer(int id, Customer customer)
         {
-            if (id != customer.Id)
+            var oldEntity = _customerService.FindByIdAsync(id);
+            if (id != customer.Id || oldEntity == null)
             {
                 return BadRequest();
             }
 
-            _context.Entry(customer).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CustomerExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok( await _customerService.UpdateAsync(customer));
         }
 
         // POST: api/Customers
@@ -77,31 +58,23 @@ namespace WebApiCore.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Customer>> PostCustomer(Customer customer)
         {
-            _context.Customers.Add(customer);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetCustomer", new { id = customer.Id }, customer);
+            return Ok(await _customerService.AddAsync(customer));
         }
 
         // DELETE: api/Customers/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
+            var customer = await _customerService.FindByIdAsync(id);
             if (customer == null)
             {
                 return NotFound();
             }
 
-            _context.Customers.Remove(customer);
-            await _context.SaveChangesAsync();
+            await _customerService.DeleteAsync(customer);
+            
 
             return NoContent();
-        }
-
-        private bool CustomerExists(int id)
-        {
-            return _context.Customers.Any(e => e.Id == id);
         }
     }
 }
